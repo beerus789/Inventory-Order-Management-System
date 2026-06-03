@@ -1,5 +1,7 @@
 """Main FastAPI application entry point."""
 
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -8,6 +10,8 @@ from app.modules.products import router as products_router
 from app.modules.customers import router as customers_router
 from app.modules.orders import router as orders_router
 from app.modules.dashboard import router as dashboard_router
+
+origins = os.getenv("CORS_ORIGINS", "*").split(",")  # Configure this in production
 
 # Create FastAPI app
 app = FastAPI(
@@ -20,7 +24,7 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure this in production
+    allow_origins=origins,  # Configure this in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

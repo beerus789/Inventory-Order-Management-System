@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     database_name: str = os.getenv("DATABASE_NAME", "inventory_db")
     database_user: str = os.getenv("DATABASE_USER", "postgres")
     database_password: str = os.getenv("DATABASE_PASSWORD", "postgres")
+    database_sslmode: str = os.getenv("DATABASE_SSLMODE", "require")
     database_url: Optional[str] = os.getenv("DATABASE_URL")
 
     # Derived database URL if not provided
@@ -31,6 +32,7 @@ class Settings(BaseSettings):
         return (
             f"postgresql+psycopg://{self.database_user}:{self.database_password}"
             f"@{self.database_host}:{self.database_port}/{self.database_name}"
+            f"?sslmode={self.database_sslmode}"
         )
 
     class Config:
