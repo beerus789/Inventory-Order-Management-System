@@ -167,6 +167,12 @@ function Orders() {
     return matchedCustomer?.full_name || matchedCustomer?.name || 'Unknown';
   };
 
+  const getOrderItems = (order) => order.items || order.order_items || order.products || [];
+
+  const getOrderItemQuantity = (order) => (
+    getOrderItems(order).reduce((total, item) => total + Number(item.quantity || 0), 0)
+  );
+
   if (loading && orders.length === 0) {
     return (
       <Layout title="Orders">
@@ -319,6 +325,7 @@ function Orders() {
                     <th>Order ID</th>
                     <th>Customer</th>
                     <th>Items</th>
+                    <th>Qty</th>
                     <th>Total Amount</th>
                     <th>Status</th>
                     <th>Date</th>
@@ -327,13 +334,15 @@ function Orders() {
                 </thead>
                 <tbody>
                   {orders.map((order) => {
-                    const itemCount = (order.items || order.order_items || order.products || []).length;
+                    const itemCount = getOrderItems(order).length;
+                    const itemQuantity = getOrderItemQuantity(order);
                     const status = order.status || 'Pending';
                     return (
                       <tr key={order.id}>
                         <td className="cell-strong">#{order.id}</td>
                         <td>{getOrderCustomerName(order)}</td>
                         <td>{itemCount}</td>
+                        <td>{itemQuantity}</td>
                         <td>${Number(order.total_amount || 0).toFixed(2)}</td>
                         <td>
                           <span className="pill pill-warning">{status}</span>
