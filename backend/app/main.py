@@ -40,13 +40,13 @@ app.include_router(orders_router)
 app.include_router(dashboard_router)
 
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health_check():
     """Health check endpoint."""
     return {"status": "healthy", "app": settings.app_name}
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def root():
     """Root endpoint."""
     return {"message": f"Welcome to {settings.app_name}"}
