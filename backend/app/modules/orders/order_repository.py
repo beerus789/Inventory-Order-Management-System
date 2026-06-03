@@ -3,7 +3,7 @@
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from .order_item_model import OrderItem
 from .order_model import Order, OrderStatus
@@ -46,11 +46,27 @@ class OrderRepository:
 
     def get_by_id(self, order_id: int) -> Optional[Order]:
         """Get order by ID."""
-        return self.db.query(Order).filter(Order.id == order_id).first()
+        return (
+            self.db.query(Order)
+            .options(
+                joinedload(Order.customer),
+                selectinload(Order.items).joinedload(OrderItem.product),
+            )
+            .filter(Order.id == order_id)
+            .first()
+        )
 
     def get_all(self) -> list[Order]:
         """Get all orders."""
-        return self.db.query(Order).all()
+        return (
+            self.db.query(Order)
+            .options(
+                joinedload(Order.customer),
+                selectinload(Order.items).joinedload(OrderItem.product),
+            )
+            .order_by(Order.created_at.desc())
+            .all()
+        )
 
     def delete(self, order: Order) -> None:
         """Delete an order."""

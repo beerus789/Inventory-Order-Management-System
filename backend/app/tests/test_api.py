@@ -276,8 +276,25 @@ def test_create_order(client):
     assert response.status_code == 201
     data = response.json()
     assert data["customer_id"] == customer_id
+    assert data["customer"]["id"] == customer_id
+    assert data["customer"]["name"] == "John Doe"
     assert float(data["total_amount"]) == 200.00
     assert len(data["items"]) == 1
+    assert data["items"][0]["product"]["id"] == product_id
+    assert data["items"][0]["product"]["name"] == "Test Product"
+
+    product_after_order = client.get(f"/products/{product_id}").json()
+    assert product_after_order["quantity"] == 8
+
+    delete_response = client.delete(f"/orders/{data['id']}")
+    assert delete_response.status_code == 204
+
+    product_after_delete = client.get(f"/products/{product_id}").json()
+    assert product_after_delete["quantity"] == 10
+
+    customer_after_delete = client.get(f"/customers/{customer_id}")
+    assert customer_after_delete.status_code == 200
+    assert customer_after_delete.json()["id"] == customer_id
 
 
 def test_insufficient_inventory_error(client):

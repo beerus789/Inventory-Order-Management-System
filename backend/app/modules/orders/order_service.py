@@ -9,6 +9,7 @@ from app.core import (
     OrderNotFoundException,
     CustomerNotFoundException,
     InvalidOrderItemsException,
+    ProductNotFoundException,
 )
 from app.modules.customers.customer_repository import CustomerRepository
 from app.modules.products.product_repository import ProductRepository
@@ -88,7 +89,7 @@ class OrderService:
 
             # Commit the transaction
             self.repository.commit()
-            return order
+            return self.repository.get_by_id(order.id)
 
         except Exception as e:
             # Rollback on any error
@@ -107,9 +108,18 @@ class OrderService:
         return self.repository.get_all()
 
     def delete_order(self, order_id: int) -> None:
-        """Delete an order."""
+        """Delete an order and restore reserved inventory."""
         order = self.get_order(order_id)
-        self.repository.delete(order)
+
+        try:
+            for item in order.items:
+                if item.product:
+                    self.product_repo.increase_stock(item.product, item.quantity)
+
+            self.repository.delete(order)
+        except Exception:
+            self.repository.rollback()
+            raise
 
     def confirm_order(self, order_id: int) -> Order:
         """Confirm an order."""

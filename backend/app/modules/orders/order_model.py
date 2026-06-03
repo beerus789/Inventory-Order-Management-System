@@ -28,6 +28,7 @@ class Order(Base, TimestampMixin):
     status: Mapped[OrderStatus] = mapped_column(SQLEnum(OrderStatus), default=OrderStatus.PENDING, nullable=False)
 
     # Relationships
+    customer = relationship("Customer")
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:

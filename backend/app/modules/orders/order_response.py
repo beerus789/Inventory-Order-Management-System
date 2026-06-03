@@ -5,6 +5,9 @@ from decimal import Decimal
 
 from pydantic import BaseModel
 
+from app.modules.customers.customer_response import CustomerResponse
+from app.modules.products.product_response import ProductResponse
+
 
 class OrderItemResponse(BaseModel):
     """Response schema for order item."""
@@ -13,6 +16,7 @@ class OrderItemResponse(BaseModel):
     product_id: int
     quantity: int
     unit_price: Decimal
+    product: ProductResponse | None = None
 
     class Config:
         from_attributes = True
@@ -22,6 +26,7 @@ class OrderItemResponse(BaseModel):
                 "product_id": 1,
                 "quantity": 5,
                 "unit_price": "99.99",
+                "product": None,
             }
         }
 
@@ -34,6 +39,7 @@ class OrderResponse(BaseModel):
     total_amount: Decimal
     status: str
     items: list[OrderItemResponse]
+    customer: CustomerResponse | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -51,8 +57,10 @@ class OrderResponse(BaseModel):
                         "product_id": 1,
                         "quantity": 5,
                         "unit_price": "99.99",
+                        "product": None,
                     }
                 ],
+                "customer": None,
                 "created_at": "2024-01-01T10:00:00",
                 "updated_at": "2024-01-01T10:00:00",
             }
@@ -80,8 +88,10 @@ class OrderListResponse(BaseModel):
                                 "product_id": 1,
                                 "quantity": 5,
                                 "unit_price": "99.99",
+                                "product": None,
                             }
                         ],
+                        "customer": None,
                         "created_at": "2024-01-01T10:00:00",
                         "updated_at": "2024-01-01T10:00:00",
                     }

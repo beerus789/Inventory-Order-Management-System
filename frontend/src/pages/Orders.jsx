@@ -158,6 +158,15 @@ function Orders() {
     }
   };
 
+  const getOrderCustomerName = (order) => {
+    if (order.customer?.full_name || order.customer?.name) {
+      return order.customer.full_name || order.customer.name;
+    }
+
+    const matchedCustomer = customers.find((customer) => customer.id === order.customer_id);
+    return matchedCustomer?.full_name || matchedCustomer?.name || 'Unknown';
+  };
+
   if (loading && orders.length === 0) {
     return (
       <Layout title="Orders">
@@ -318,12 +327,12 @@ function Orders() {
                 </thead>
                 <tbody>
                   {orders.map((order) => {
-                    const itemCount = (order.order_items || order.products || []).length;
+                    const itemCount = (order.items || order.order_items || order.products || []).length;
                     const status = order.status || 'Pending';
                     return (
                       <tr key={order.id}>
                         <td className="cell-strong">#{order.id}</td>
-                        <td>{order.customer?.full_name || order.customer?.name || 'Unknown'}</td>
+                        <td>{getOrderCustomerName(order)}</td>
                         <td>{itemCount}</td>
                         <td>${Number(order.total_amount || 0).toFixed(2)}</td>
                         <td>

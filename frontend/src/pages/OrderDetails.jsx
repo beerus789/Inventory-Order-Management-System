@@ -5,6 +5,7 @@ import Loading from '../components/Loading';
 import Alert from '../components/Alert';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { getOrderById, deleteOrder } from '../api/orderApi';
+import { getCustomerById } from '../api/customerApi';
 
 function OrderDetails() {
   const { id } = useParams();
@@ -14,6 +15,7 @@ function OrderDetails() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [customerDetails, setCustomerDetails] = useState(null);
 
   useEffect(() => {
     loadOrderDetails();
@@ -24,7 +26,20 @@ function OrderDetails() {
       setLoading(true);
       setError(null);
       const response = await getOrderById(id);
-      setOrder(response.data?.data || response.data);
+      const loadedOrder = response.data?.data || response.data;
+      setOrder(loadedOrder);
+
+      if (!loadedOrder.customer && loadedOrder.customer_id) {
+        try {
+          const customerResponse = await getCustomerById(loadedOrder.customer_id);
+          setCustomerDetails(customerResponse.data?.data || customerResponse.data);
+        } catch (customerErr) {
+          console.error('Error loading customer details:', customerErr);
+          setCustomerDetails(null);
+        }
+      } else {
+        setCustomerDetails(null);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load order details');
       console.error('Error loading order details:', err);
@@ -67,8 +82,8 @@ function OrderDetails() {
     );
   }
 
-  const orderItems = order.order_items || order.products || [];
-  const customer = order.customer || {};
+  const orderItems = order.items || order.order_items || order.products || [];
+  const customer = order.customer || customerDetails || {};
 
   return (
     <Layout title="Order Details">

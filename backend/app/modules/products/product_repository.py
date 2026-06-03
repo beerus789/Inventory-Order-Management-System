@@ -51,6 +51,13 @@ class ProductRepository:
     def reduce_stock(self, product: Product, quantity: int) -> Product:
         """Reduce product stock."""
         product.quantity -= quantity
-        self.db.commit()
-        self.db.refresh(product)
+        self.db.add(product)
+        self.db.flush()
+        return product
+
+    def increase_stock(self, product: Product, quantity: int) -> Product:
+        """Increase product stock."""
+        product.quantity += quantity
+        self.db.add(product)
+        self.db.flush()
         return product
