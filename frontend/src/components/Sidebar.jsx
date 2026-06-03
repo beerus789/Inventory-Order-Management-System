@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 function Sidebar() {
@@ -10,19 +10,29 @@ function Sidebar() {
 
   return (
     <div className="sidebar">
-      <div className="sidebar-title">📦 Inventory</div>
+      <div className="sidebar-title">
+        <span className="brand-mark">I</span>
+        <span className="brand-copy">
+          Inventory
+          <small>Order manager</small>
+        </span>
+      </div>
       <nav className="sidebar-nav">
         <Link to="/" className={`nav-link ${isActive('/')}`}>
-          📊 Dashboard
+          <span className="nav-icon">D</span>
+          <span>Dashboard</span>
         </Link>
         <Link to="/products" className={`nav-link ${isActive('/products')}`}>
-          📦 Products
+          <span className="nav-icon">P</span>
+          <span>Products</span>
         </Link>
         <Link to="/customers" className={`nav-link ${isActive('/customers')}`}>
-          👥 Customers
+          <span className="nav-icon">C</span>
+          <span>Customers</span>
         </Link>
         <Link to="/orders" className={`nav-link ${isActive('/orders')}`}>
-          📋 Orders
+          <span className="nav-icon">O</span>
+          <span>Orders</span>
         </Link>
       </nav>
     </div>

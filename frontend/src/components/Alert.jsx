@@ -9,7 +9,9 @@ function Alert({ type, message, onClose, duration = 5000 }) {
   return (
     <div className={`alert alert-${type}`}>
       <span>{message}</span>
-      <button className="alert-close" onClick={onClose}>×</button>
+      <button className="alert-close" onClick={onClose} aria-label="Close alert">
+        x
+      </button>
     </div>
   );
 }

@@ -67,6 +67,7 @@ function Orders() {
   };
 
   const removeOrderItem = (index) => {
+    if (orderItems.length === 1) return;
     setOrderItems(orderItems.filter((_, i) => i !== index));
   };
 
@@ -87,13 +88,13 @@ function Orders() {
     }
 
     let hasValidItems = true;
-    for (let item of orderItems) {
+    for (const item of orderItems) {
       if (!item.product_id) {
         errors.items = 'Please select a product for all items';
         hasValidItems = false;
         break;
       }
-      if (!item.quantity || parseInt(item.quantity) < 1) {
+      if (!item.quantity || parseInt(item.quantity, 10) < 1) {
         errors.items = 'All quantities must be at least 1';
         hasValidItems = false;
         break;
@@ -123,10 +124,10 @@ function Orders() {
       setLoading(true);
 
       const payload = {
-        customer_id: parseInt(formData.customer_id),
+        customer_id: parseInt(formData.customer_id, 10),
         items: orderItems.map((item) => ({
-          product_id: parseInt(item.product_id),
-          quantity: parseInt(item.quantity),
+          product_id: parseInt(item.product_id, 10),
+          quantity: parseInt(item.quantity, 10),
         })),
       };
 
@@ -158,12 +159,16 @@ function Orders() {
   };
 
   if (loading && orders.length === 0) {
-    return <Layout title="Orders"><Loading /></Layout>;
+    return (
+      <Layout title="Orders">
+        <Loading />
+      </Layout>
+    );
   }
 
   return (
     <Layout title="Orders">
-      <div>
+      <div className="page-stack">
         {error && (
           <Alert
             type="error"
@@ -179,12 +184,12 @@ function Orders() {
           />
         )}
 
-        <div style={{ marginBottom: '20px' }}>
+        <div className="page-actions">
           <button
             className="btn btn-primary"
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => setShowForm((current) => !current)}
           >
-            {showForm ? '✕ Cancel' : '+ Create Order'}
+            {showForm ? 'Cancel' : '+ Create Order'}
           </button>
         </div>
 
@@ -194,15 +199,14 @@ function Orders() {
               <h3>Create New Order</h3>
             </div>
             <form onSubmit={handleSubmit} className="form-container">
-              <div className="form-group">
+              <div className="form-group full-width">
                 <label>Customer *</label>
                 <select
                   value={formData.customer_id}
                   onChange={handleCustomerChange}
                   required
-                  style={formErrors.customer_id ? { borderColor: '#dc3545' } : {}}
                 >
-                  <option value="">-- Select Customer --</option>
+                  <option value="">Select customer</option>
                   {customers.map((customer) => (
                     <option key={customer.id} value={customer.id}>
                       {customer.full_name || customer.name}
@@ -210,24 +214,16 @@ function Orders() {
                   ))}
                 </select>
                 {formErrors.customer_id && (
-                  <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '5px' }}>
-                    {formErrors.customer_id}
-                  </div>
+                  <div className="field-error">{formErrors.customer_id}</div>
                 )}
               </div>
 
-              <h4 style={{ marginTop: '20px', marginBottom: '12px' }}>Order Items</h4>
+              <div className="form-group full-width">
+                <h4>Order Items</h4>
+              </div>
+
               {orderItems.map((item, index) => (
-                <div
-                  key={index}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 150px 50px',
-                    gap: '10px',
-                    marginBottom: '12px',
-                    alignItems: 'flex-end',
-                  }}
-                >
+                <div key={index} className="order-item-row">
                   <div>
                     <label>Product</label>
                     <select
@@ -237,7 +233,7 @@ function Orders() {
                       }
                       required
                     >
-                      <option value="">-- Select Product --</option>
+                      <option value="">Select product</option>
                       {products.map((product) => (
                         <option key={product.id} value={product.id}>
                           {product.name} - ${parseFloat(product.price).toFixed(2)}
@@ -259,26 +255,27 @@ function Orders() {
                   </div>
                   <button
                     type="button"
-                    className="btn btn-danger"
+                    className="btn btn-secondary"
                     onClick={() => removeOrderItem(index)}
-                    style={{ padding: '8px 12px' }}
+                    disabled={orderItems.length === 1}
                   >
                     Remove
                   </button>
                 </div>
               ))}
 
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={addOrderItem}
-                style={{ marginBottom: '20px' }}
-              >
-                + Add Another Item
-              </button>
+              <div className="form-group full-width">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={addOrderItem}
+                >
+                  + Add Item
+                </button>
+              </div>
 
               {formErrors.items && (
-                <div style={{ color: '#dc3545', fontSize: '13px', marginBottom: '15px', padding: '10px', backgroundColor: '#f8d7da', borderRadius: '4px' }}>
+                <div className="inline-error">
                   {formErrors.items}
                 </div>
               )}
@@ -301,7 +298,7 @@ function Orders() {
           </div>
           {orders.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">📋</div>
+              <div className="empty-state-icon">O</div>
               <div className="empty-state-title">No Orders</div>
               <div className="empty-state-message">Start by creating your first order</div>
             </div>
@@ -322,13 +319,16 @@ function Orders() {
                 <tbody>
                   {orders.map((order) => {
                     const itemCount = (order.order_items || order.products || []).length;
+                    const status = order.status || 'Pending';
                     return (
                       <tr key={order.id}>
-                        <td>#{order.id}</td>
+                        <td className="cell-strong">#{order.id}</td>
                         <td>{order.customer?.full_name || order.customer?.name || 'Unknown'}</td>
                         <td>{itemCount}</td>
-                        <td>${(order.total_amount || 0).toFixed(2)}</td>
-                        <td>{order.status || 'Pending'}</td>
+                        <td>${Number(order.total_amount || 0).toFixed(2)}</td>
+                        <td>
+                          <span className="pill pill-warning">{status}</span>
+                        </td>
                         <td>
                           {order.created_at
                             ? new Date(order.created_at).toLocaleDateString()
@@ -337,14 +337,14 @@ function Orders() {
                         <td>
                           <div className="btn-group">
                             <button
-                              className="btn btn-primary"
+                              className="btn btn-primary btn-compact"
                               onClick={() => navigate(`/orders/${order.id}`)}
                               disabled={loading}
                             >
                               View
                             </button>
                             <button
-                              className="btn btn-danger"
+                              className="btn btn-danger btn-compact"
                               onClick={() => setConfirmDelete(order.id)}
                               disabled={loading}
                             >

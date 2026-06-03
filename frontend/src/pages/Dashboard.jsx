@@ -36,7 +36,6 @@ function Dashboard() {
       const customers = customersRes.data?.data || customersRes.data || [];
       const orders = ordersRes.data?.data || ordersRes.data || [];
 
-      // Find low stock products (quantity <= 5)
       const lowStockCount = products.filter(
         (p) => (p.quantity_in_stock || p.quantity || 0) <= 5
       ).length;
@@ -55,11 +54,17 @@ function Dashboard() {
     }
   };
 
-  if (loading) return <Layout title="Dashboard"><Loading /></Layout>;
+  if (loading) {
+    return (
+      <Layout title="Dashboard">
+        <Loading />
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Dashboard">
-      <div>
+      <div className="page-stack">
         {error && (
           <Alert
             type="error"
@@ -73,34 +78,53 @@ function Dashboard() {
             title="Total Products"
             value={stats.totalProducts}
             className="products"
+            note="Catalog items"
           />
           <SummaryCard
             title="Total Customers"
             value={stats.totalCustomers}
             className="customers"
+            note="Buyer records"
           />
           <SummaryCard
             title="Total Orders"
             value={stats.totalOrders}
             className="orders"
+            note="Order history"
           />
           <SummaryCard
-            title="Low Stock Products"
+            title="Low Stock"
             value={stats.lowStockProducts}
             className="low-stock"
+            note="Needs attention"
           />
         </div>
 
         <div className="card">
           <div className="card-header">
-            <h2>Quick Stats</h2>
+            <h2>Inventory Snapshot</h2>
           </div>
-          <div style={{ padding: '20px' }}>
-            <p>👋 Welcome to the Inventory & Order Management System</p>
-            <p style={{ marginTop: '12px', color: '#7f8c8d', fontSize: '14px' }}>
-              Use the navigation menu on the left to manage products, customers, and orders. 
-              Keep track of low stock items to ensure inventory levels are adequate.
+          <div className="panel-copy">
+            <div className="panel-kicker">Live workspace</div>
+            <h3>Stock, buyers, and orders in one responsive console.</h3>
+            <p>
+              The dashboard highlights catalog size, customer activity, order volume,
+              and stock risk so the next action is easy to spot.
             </p>
+            <div className="metric-strip">
+              <div className="metric-item">
+                <span>Stock risk</span>
+                <strong>{stats.lowStockProducts}</strong>
+              </div>
+              <div className="metric-item">
+                <span>Customers</span>
+                <strong>{stats.totalCustomers}</strong>
+              </div>
+              <div className="metric-item">
+                <span>Orders</span>
+                <strong>{stats.totalOrders}</strong>
+              </div>
+            </div>
           </div>
         </div>
       </div>

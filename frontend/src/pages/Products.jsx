@@ -94,7 +94,7 @@ function Products() {
     if (formData.quantity_in_stock === '') {
       errors.quantity_in_stock = 'Quantity is required';
       isValid = false;
-    } else if (parseInt(formData.quantity_in_stock) < 0) {
+    } else if (parseInt(formData.quantity_in_stock, 10) < 0) {
       errors.quantity_in_stock = 'Quantity cannot be negative';
       isValid = false;
     }
@@ -115,7 +115,7 @@ function Products() {
         name: formData.name,
         sku: formData.sku,
         price: parseFloat(formData.price),
-        quantity: parseInt(formData.quantity_in_stock),
+        quantity: parseInt(formData.quantity_in_stock, 10),
       };
 
       if (editingId) {
@@ -168,13 +168,24 @@ function Products() {
     }
   };
 
+  const startNewProduct = () => {
+    setEditingId(null);
+    setFormData({ name: '', sku: '', price: '', quantity_in_stock: '' });
+    setFormErrors({ name: '', sku: '', price: '', quantity_in_stock: '' });
+    setShowForm((current) => !current);
+  };
+
   if (loading && products.length === 0) {
-    return <Layout title="Products"><Loading /></Layout>;
+    return (
+      <Layout title="Products">
+        <Loading />
+      </Layout>
+    );
   }
 
   return (
     <Layout title="Products">
-      <div>
+      <div className="page-stack">
         {error && (
           <Alert
             type="error"
@@ -190,16 +201,9 @@ function Products() {
           />
         )}
 
-        <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              setEditingId(null);
-              setFormData({ name: '', sku: '', price: '', quantity_in_stock: '' });
-              setShowForm(!showForm);
-            }}
-          >
-            {showForm ? '✕ Cancel' : '+ Add Product'}
+        <div className="page-actions">
+          <button className="btn btn-primary" onClick={startNewProduct}>
+            {showForm ? 'Cancel' : '+ Add Product'}
           </button>
         </div>
 
@@ -217,13 +221,8 @@ function Products() {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  style={formErrors.name ? { borderColor: '#dc3545' } : {}}
                 />
-                {formErrors.name && (
-                  <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '5px' }}>
-                    {formErrors.name}
-                  </div>
-                )}
+                {formErrors.name && <div className="field-error">{formErrors.name}</div>}
               </div>
               <div className="form-group">
                 <label>SKU *</label>
@@ -233,13 +232,8 @@ function Products() {
                   value={formData.sku}
                   onChange={handleInputChange}
                   required
-                  style={formErrors.sku ? { borderColor: '#dc3545' } : {}}
                 />
-                {formErrors.sku && (
-                  <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '5px' }}>
-                    {formErrors.sku}
-                  </div>
-                )}
+                {formErrors.sku && <div className="field-error">{formErrors.sku}</div>}
               </div>
               <div className="form-group">
                 <label>Price *</label>
@@ -251,13 +245,8 @@ function Products() {
                   value={formData.price}
                   onChange={handleInputChange}
                   required
-                  style={formErrors.price ? { borderColor: '#dc3545' } : {}}
                 />
-                {formErrors.price && (
-                  <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '5px' }}>
-                    {formErrors.price}
-                  </div>
-                )}
+                {formErrors.price && <div className="field-error">{formErrors.price}</div>}
               </div>
               <div className="form-group">
                 <label>Quantity in Stock *</label>
@@ -268,12 +257,9 @@ function Products() {
                   value={formData.quantity_in_stock}
                   onChange={handleInputChange}
                   required
-                  style={formErrors.quantity_in_stock ? { borderColor: '#dc3545' } : {}}
                 />
                 {formErrors.quantity_in_stock && (
-                  <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '5px' }}>
-                    {formErrors.quantity_in_stock}
-                  </div>
+                  <div className="field-error">{formErrors.quantity_in_stock}</div>
                 )}
               </div>
               <div className="btn-group">
@@ -294,7 +280,7 @@ function Products() {
           </div>
           {products.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">📦</div>
+              <div className="empty-state-icon">P</div>
               <div className="empty-state-title">No Products</div>
               <div className="empty-state-message">Start by adding your first product</div>
             </div>
@@ -317,30 +303,26 @@ function Products() {
                     const isLowStock = quantity <= 5;
                     return (
                       <tr key={product.id}>
-                        <td>{product.name}</td>
+                        <td className="cell-strong">{product.name}</td>
                         <td>{product.sku || product.code || 'N/A'}</td>
                         <td>${parseFloat(product.price).toFixed(2)}</td>
                         <td>{quantity}</td>
                         <td>
-                          {isLowStock ? (
-                            <span style={{ color: '#e74c3c', fontWeight: 'bold' }}>
-                              ⚠ Low Stock
-                            </span>
-                          ) : (
-                            <span style={{ color: '#27ae60' }}>✓ In Stock</span>
-                          )}
+                          <span className={`pill ${isLowStock ? 'pill-danger' : 'pill-success'}`}>
+                            {isLowStock ? 'Low Stock' : 'In Stock'}
+                          </span>
                         </td>
                         <td>
                           <div className="btn-group">
                             <button
-                              className="btn btn-warning"
+                              className="btn btn-warning btn-compact"
                               onClick={() => handleEdit(product)}
                               disabled={loading}
                             >
                               Edit
                             </button>
                             <button
-                              className="btn btn-danger"
+                              className="btn btn-danger btn-compact"
                               onClick={() => setConfirmDelete(product.id)}
                               disabled={loading}
                             >

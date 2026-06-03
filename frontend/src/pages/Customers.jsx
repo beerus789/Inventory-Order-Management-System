@@ -69,9 +69,7 @@ function Customers() {
   };
 
   const validatePhone = (phone) => {
-    // Remove all non-digit characters
     const digitsOnly = phone.replace(/\D/g, '');
-    // Must be 10-20 digits
     return digitsOnly.length >= 10 && digitsOnly.length <= 20;
   };
 
@@ -79,27 +77,24 @@ function Customers() {
     const errors = { name: '', email: '', phone: '' };
     let isValid = true;
 
-    // Name validation
     if (!formData.name.trim()) {
       errors.name = 'Customer name is required';
       isValid = false;
     }
 
-    // Email validation
     if (!formData.email.trim()) {
       errors.email = 'Email is required';
       isValid = false;
     } else if (!validateEmail(formData.email)) {
-      errors.email = 'Please enter a valid email address (e.g., user@example.com)';
+      errors.email = 'Please enter a valid email address';
       isValid = false;
     }
 
-    // Phone validation
     if (!formData.phone.trim()) {
       errors.phone = 'Phone number is required';
       isValid = false;
     } else if (!validatePhone(formData.phone)) {
-      errors.phone = 'Phone must be 10-20 digits (can include dashes, spaces, parentheses)';
+      errors.phone = 'Phone must be 10-20 digits';
       isValid = false;
     }
 
@@ -149,12 +144,16 @@ function Customers() {
   };
 
   if (loading && customers.length === 0) {
-    return <Layout title="Customers"><Loading /></Layout>;
+    return (
+      <Layout title="Customers">
+        <Loading />
+      </Layout>
+    );
   }
 
   return (
     <Layout title="Customers">
-      <div>
+      <div className="page-stack">
         {error && (
           <Alert
             type="error"
@@ -170,12 +169,12 @@ function Customers() {
           />
         )}
 
-        <div style={{ marginBottom: '20px' }}>
+        <div className="page-actions">
           <button
             className="btn btn-primary"
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => setShowForm((current) => !current)}
           >
-            {showForm ? '✕ Cancel' : '+ Add Customer'}
+            {showForm ? 'Cancel' : '+ Add Customer'}
           </button>
         </div>
 
@@ -193,13 +192,8 @@ function Customers() {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  style={formErrors.name ? { borderColor: '#dc3545' } : {}}
                 />
-                {formErrors.name && (
-                  <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '5px' }}>
-                    {formErrors.name}
-                  </div>
-                )}
+                {formErrors.name && <div className="field-error">{formErrors.name}</div>}
               </div>
               <div className="form-group">
                 <label>Email *</label>
@@ -209,15 +203,10 @@ function Customers() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  style={formErrors.email ? { borderColor: '#dc3545' } : {}}
                 />
-                {formErrors.email && (
-                  <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '5px' }}>
-                    {formErrors.email}
-                  </div>
-                )}
+                {formErrors.email && <div className="field-error">{formErrors.email}</div>}
               </div>
-              <div className="form-group">
+              <div className="form-group full-width">
                 <label>Phone Number *</label>
                 <input
                   type="tel"
@@ -225,14 +214,9 @@ function Customers() {
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
-                  placeholder="e.g., 123-456-7890 or (123) 456-7890"
-                  style={formErrors.phone ? { borderColor: '#dc3545' } : {}}
+                  placeholder="123-456-7890"
                 />
-                {formErrors.phone && (
-                  <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '5px' }}>
-                    {formErrors.phone}
-                  </div>
-                )}
+                {formErrors.phone && <div className="field-error">{formErrors.phone}</div>}
               </div>
               <div className="btn-group">
                 <button type="submit" className="btn btn-success" disabled={loading}>
@@ -252,7 +236,7 @@ function Customers() {
           </div>
           {customers.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">👥</div>
+              <div className="empty-state-icon">C</div>
               <div className="empty-state-title">No Customers</div>
               <div className="empty-state-message">Start by adding your first customer</div>
             </div>
@@ -270,12 +254,12 @@ function Customers() {
                 <tbody>
                   {customers.map((customer) => (
                     <tr key={customer.id}>
-                      <td>{customer.full_name || customer.name}</td>
+                      <td className="cell-strong">{customer.full_name || customer.name}</td>
                       <td>{customer.email}</td>
                       <td>{customer.phone}</td>
                       <td>
                         <button
-                          className="btn btn-danger"
+                          className="btn btn-danger btn-compact"
                           onClick={() => setConfirmDelete(customer.id)}
                           disabled={loading}
                         >

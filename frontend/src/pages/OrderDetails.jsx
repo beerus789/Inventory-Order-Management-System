@@ -48,7 +48,11 @@ function OrderDetails() {
   };
 
   if (loading) {
-    return <Layout title="Order Details"><Loading /></Layout>;
+    return (
+      <Layout title="Order Details">
+        <Loading />
+      </Layout>
+    );
   }
 
   if (!order) {
@@ -68,7 +72,7 @@ function OrderDetails() {
 
   return (
     <Layout title="Order Details">
-      <div>
+      <div className="page-stack">
         {error && (
           <Alert
             type="error"
@@ -84,28 +88,29 @@ function OrderDetails() {
           />
         )}
 
-        <div style={{ marginBottom: '20px' }}>
+        <div className="page-actions">
           <button className="btn btn-secondary" onClick={() => navigate('/orders')}>
-            ← Back to Orders
+            Back to Orders
           </button>
         </div>
 
         <div className="card">
           <div className="card-header">
-            <h3>Order #{order.id}</h3>
-            <div className="btn-group">
-              <button
-                className="btn btn-danger"
-                onClick={() => setConfirmDelete(true)}
-                disabled={loading}
-              >
-                Delete Order
-              </button>
+            <div>
+              <h3>Order #{order.id}</h3>
+              <p>{order.status || 'Pending'}</p>
             </div>
+            <button
+              className="btn btn-danger"
+              onClick={() => setConfirmDelete(true)}
+              disabled={loading}
+            >
+              Delete Order
+            </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-            <div>
+          <div className="detail-grid">
+            <div className="detail-block">
               <h4>Order Information</h4>
               <p><strong>Order ID:</strong> #{order.id}</p>
               <p><strong>Status:</strong> {order.status || 'Pending'}</p>
@@ -113,10 +118,10 @@ function OrderDetails() {
                 <strong>Created Date:</strong>{' '}
                 {order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A'}
               </p>
-              <p><strong>Total Amount:</strong> ${(order.total_amount || 0).toFixed(2)}</p>
+              <p><strong>Total Amount:</strong> ${Number(order.total_amount || 0).toFixed(2)}</p>
             </div>
 
-            <div>
+            <div className="detail-block">
               <h4>Customer Information</h4>
               <p><strong>Name:</strong> {customer.full_name || customer.name || 'Unknown'}</p>
               <p><strong>Email:</strong> {customer.email || 'N/A'}</p>
@@ -131,7 +136,7 @@ function OrderDetails() {
           </div>
           {orderItems.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">🛒</div>
+              <div className="empty-state-icon">I</div>
               <div className="empty-state-title">No Items</div>
             </div>
           ) : (
@@ -155,7 +160,7 @@ function OrderDetails() {
 
                     return (
                       <tr key={index}>
-                        <td>{product.name || 'Unknown'}</td>
+                        <td className="cell-strong">{product.name || 'Unknown'}</td>
                         <td>{product.sku || product.code || 'N/A'}</td>
                         <td>{quantity}</td>
                         <td>${price.toFixed(2)}</td>
